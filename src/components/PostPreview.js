@@ -1,7 +1,21 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useMutation } from 'react-apollo-hooks';
+import gql from 'graphql-tag';
+import authenticate from '../utils/authenticate';
 
-function PostPreview({_id,title,author}){
+const DELETE_POST = gql`
+
+    mutation deletePost($id:ID!){
+        deleteOnePost(id:$id)
+    }
+
+`;
+
+
+function PostPreview({_id,title,author, edit, remove}){
+     const { isAuthenticated, payload } = authenticate();
+    const [deletePost] = useMutation(DELETE_POST);
     return (
         <div className="post-preview">
             <Link to={`/post/${_id}`} >
@@ -11,10 +25,23 @@ function PostPreview({_id,title,author}){
             </Link>
             
             <p className="post-meta">
-                Posted by <a href="#">
-                    {author.first_name} {author.last_name}
-                </a>
+                Posted by <Link to="#">{author.first_name} {author.last_name}</Link>
             </p>
+            {
+                isAuthenticated && payload.first_name === author.first_name ? (
+                    <p>
+                {
+                    edit ? <Link to={`/update/${_id}`}>Editar</Link>: <></>
+                }
+                {
+                    remove ? <button onClick={ () => {
+                            deletePost({variables:{id:_id}}).then(() => {
+                                window.location.reload();
+                            })}
+                    }>Borrar Post</button>:<></>}
+                </p>
+                ) : (<></>)
+            }
         </div>
     )
 }

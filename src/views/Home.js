@@ -35,6 +35,8 @@ function Home() {
                             title={post.title} 
                             author={post.author}
                             key={post._id}
+                            edit
+                            remove
                             />
                         ))
                     }
